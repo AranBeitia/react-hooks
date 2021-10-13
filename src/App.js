@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { BrowserRouter, Route } from 'react-router-dom'
 
 import Home from './pages/Home'
@@ -45,6 +45,30 @@ function App() {
 	const [isLoading, setIsLoading] = useState(false)
 	const [hasError, setHasError] = useState(false)
 	const [loadingError, setLoadingError] = useState(null)
+
+	useEffect(() => {
+		const prevItems = loadLocalStorageData()
+
+		if (!prevItems) {
+			setIsLoading(true)
+
+			api.getProducts().then((data) => {
+				setProducts(data)
+				setIsLoading(false)
+			})
+			return
+		}
+
+		setCartItems(prevItems.cartItems)
+		setProducts(prevItems.products)
+	}, [])
+
+	useEffect(() => {
+		localStorage.setItem(
+			LOCAL_STORAGE_KEY,
+			JSON.stringify({ cartItems, products })
+		)
+	}, [products, cartItems])
 
 	const handleAddToCart = (productId) => {
 		const prevCartItem = cartItems.find((item) => item.id === productId)
@@ -190,39 +214,5 @@ function App() {
 		</BrowserRouter>
 	)
 }
-// class App extends Component {
-// 	constructor(props) {
-
-// 	componentDidMount() {
-// 		const prevItems = loadLocalStorageData()
-
-// 		if (!prevItems) {
-// 			this.setState({
-// 				isLoading: true,
-// 			})
-
-// 			api.getProducts().then((data) => {
-// 				this.setState({
-// 					products: data,
-// 					isLoading: false,
-// 				})
-// 			})
-// 			return
-// 		}
-
-// 		this.setState({
-// 			cartItems: prevItems.cartItems,
-// 			products: prevItems.products,
-// 		})
-// 	}
-
-// 	componentDidUpdate() {
-// 		const { cartItems, products } = this.state
-
-// 		localStorage.setItem(
-// 			LOCAL_STORAGE_KEY,
-// 			JSON.stringify({ cartItems, products })
-// 		)
-// 	}
 
 export default App
